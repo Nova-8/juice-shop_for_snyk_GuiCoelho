@@ -31,7 +31,7 @@ jobs:
 
       - name: Authenticate with Snyk
         env:
-          SNYK_TOKEN: ${{ secrets.SNYK_AUTH }}
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: snyk auth "$SNYK_TOKEN"
 
       - name: Snyk Open Source Test (SCA)
