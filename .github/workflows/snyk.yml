@@ -7,21 +7,17 @@ on:
     branches: [master]
 
 jobs:
-  build:
-    name: Snyk Scan Pipeline
+  snyk-scan:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [16.x]
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          node-version: '16'
 
       - name: Install Snyk CLI
         run: npm install -g snyk
