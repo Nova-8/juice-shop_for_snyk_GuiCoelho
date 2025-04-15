@@ -1,26 +1,57 @@
-name: Snyk Scan
+name: Snyk Full Scan
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [master]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [master]
 
 jobs:
-  snyk:
+  build:
+    name: Test and Build with Snyk
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions@v1
+      - name: Install Snyk CLI and snyk-to-html
+        run: |
+          npm install snyk -g
+          npm install snyk-to-html -g
+          snyk auth "${{ secrets.SNYK_TOKEN }}"
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: test
+
+      - name: Snyk Monitor - Open Source
+        run: snyk monitor
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Snyk Code Test - Static Analysis
+        run: snyk code test || true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Build Docker Image
+        run: docker build . -t juice-shop:test
+
+      - name: Snyk Container Monitor
+        run: snyk container monitor juice-shop:test --file=Dockerfile
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Snyk IaC Test
+        run: snyk iac test || true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
