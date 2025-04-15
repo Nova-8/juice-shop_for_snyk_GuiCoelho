@@ -31,6 +31,9 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: snyk auth "$SNYK_TOKEN"
 
+      - name: Install project dependencies
+        run: npm install
+
       - name: Run Snyk Open Source Test (SCA)
         run: snyk test || true
 
