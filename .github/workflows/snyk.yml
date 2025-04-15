@@ -37,6 +37,11 @@ jobs:
         run: snyk monitor
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          
+      - name: Snyk Test (Open Source SCA)
+        run: snyk test || true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Snyk Code Test - Static Analysis
         run: snyk code test || true
